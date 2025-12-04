@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Registro de Equipos</title>
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Registro de Equipos</h1>
+            <p class="tagline">Sistema de gestión tecnológica</p>
+        </div>
+
+        <!-- Alertas -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} fade-in">
+                        <span>
+                            {% if category == 'success' %}✅
+                            {% elif category == 'danger' %}❌
+                            {% elif category == 'warning' %}⚠️
+                            {% else %}ℹ️{% endif %}
+                        </span>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Formulario -->
+        <div class="card">
+            <h2 class="card-title">Formulario de Equipos</h2>
+            <form method="POST" action="/registrar" class="form-grid">
+                <!-- Fila 1 -->
+                <div class="form-group">
+                    <label class="form-label required">Código</label>
+                    <input type="text" class="form-control" name="codigo" required 
+                           placeholder="EQ001" pattern="[A-Z0-9\-_]+">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label required">Tipo de Equipo</label>
+                    <select class="form-control" name="tipo_equipo" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Laptop">Laptop</option>
+                        <option value="Desktop">Desktop</option>
+                        <option value="Servidor">Servidor</option>
+                        <option value="Tablet">Tablet</option>
+                        <option value="Impresora">Impresora</option>
+                        <option value="Router">Router</option>
+                        <option value="Switch">Switch</option>
+                    </select>
+                </div>
+
+                <!-- Fila 2 -->
+                <div class="form-group">
+                    <label class="form-label required">Marca</label>
+                    <input type="text" class="form-control" name="marca" required 
+                           placeholder="Dell, HP, Lenovo">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Modelo</label>
+                    <input type="text" class="form-control" name="modelo" 
+                           placeholder="XPS 13, ThinkPad">
+                </div>
+
+                <!-- Fila 3 -->
+                <div class="form-group">
+                    <label class="form-label">Sistema Operativo</label>
+                    <select class="form-control" name="sistema_operativo">
+                        <option value="">Seleccionar...</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="Windows 11">Windows 11</option>
+                        <option value="macOS">macOS</option>
+                        <option value="Linux Ubuntu">Linux Ubuntu</option>
+                        <option value="Linux CentOS">Linux CentOS</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Almacenamiento (GB)</label>
+                    <input type="number" class="form-control" name="almacenamiento_gb" 
+                           min="0" placeholder="256, 512, 1024">
+                </div>
+
+                <!-- Fila 4 -->
+                <div class="form-group">
+                    <label class="form-label">RAM</label>
+                    <select class="form-control" name="ram">
+                        <option value="">Seleccionar...</option>
+                        <option value="4 GB">4 GB</option>
+                        <option value="8 GB">8 GB</option>
+                        <option value="16 GB">16 GB</option>
+                        <option value="32 GB">32 GB</option>
+                        <option value="64 GB">64 GB</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Estado</label>
+                    <select class="form-control" name="estado">
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                        <option value="En reparación">En reparación</option>
+                        <option value="Dañado">Dañado</option>
+                    </select>
+                </div>
+
+                <!-- Fila 5 -->
+                <div class="form-group">
+                    <label class="form-label">Fecha de Mantenimiento</label>
+                    <input type="date" class="form-control" name="fecha_mantenimiento" 
+                           value="{{ hoy }}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Fecha de Registro</label>
+                    <input type="date" class="form-control" name="fecha_registro" 
+                           value="{{ hoy }}">
+                </div>
+
+                <!-- Botón -->
+                <div class="form-group" style="grid-column: 1 / -1; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px;">
+                        REGISTRAR EQUIPO
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista de Equipos -->
+        <div class="card">
+            <h2 class="card-title">Equipos Registrados</h2>
+            
+            {% if equipos %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Tipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Sistema</th>
+                                <th>RAM</th>
+                                <th>Almacenamiento</th>
+                                <th>Estado</th>
+                                <th>Mantenimiento</th>
+                                <th>Registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for equipo in equipos %}
+                            <tr class="fade-in">
+                                <td><strong>{{ equipo.codigo }}</strong></td>
+                                <td>{{ equipo.tipo_equipo }}</td>
+                                <td>{{ equipo.marca }}</td>
+                                <td>{{ equipo.modelo or '-' }}</td>
+                                <td>{{ equipo.sistema_operativo or '-' }}</td>
+                                <td>{{ equipo.ram or '-' }}</td>
+                                <td>
+                                    {% if equipo.almacenamiento_gb %}
+                                        {{ equipo.almacenamiento_gb }} GB
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if equipo.estado == 'Activo' %}
+                                        <span class="badge badge-success">Activo</span>
+                                    {% elif equipo.estado == 'En reparación' %}
+                                        <span class="badge badge-warning">Reparación</span>
+                                    {% elif equipo.estado == 'Inactivo' %}
+                                        <span class="badge badge-secondary">Inactivo</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">{{ equipo.estado }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ equipo.fecha_mantenimiento or '-' }}</td>
+                                <td>{{ equipo.fecha_registro or '-' }}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" 
+                                            onclick="if(confirm('¿Eliminar equipo {{ equipo.codigo }}?')) window.location.href='/eliminar/{{ equipo.id }}'">
+                                        ELIMINAR
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <h3>No hay equipos registrados</h3>
+                    <p>Comienza registrando tu primer equipo</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Sistema de Gestión de Equipos | {{ hoy }}</p>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light text-center">
+        <div class="container">
+            <span class="text-muted">
+                <i class="bi bi-database"></i> Conectado a MySQL RDS AWS | 
+                <i class="bi bi-cpu"></i> Sistema de Gestión de Equipos v1.0
+            </span>
+        </div>
+    </footer>
+
+    
+    <script src="{{ url_for('static', filename='js/web.js') }}"></script>
+</body>
+</html>
